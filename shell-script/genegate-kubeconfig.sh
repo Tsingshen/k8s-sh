@@ -5,6 +5,7 @@ USER_NAME="vs-ro"
 NAMESPACE="default"
 SERVER_ADDR="https://xx.com"
 
+
 # 创建sa
 kubectl -n ${NAMESPACE} create sa ${USER_NAME}
 
@@ -54,7 +55,8 @@ EOF
 secret_data_ca_crt=$(kubectl get secrets ${USER_NAME} -o go-template='{{index .data "ca.crt"}}')
 secret_data_token=$(kubectl get secrets ${USER_NAME} -o go-template='{{index .data "token"}}'|base64 -d)
 
-echo """
+echo """生成的kueconfig为:
+---
 apiVersion: v1
 clusters:
 - cluster:
