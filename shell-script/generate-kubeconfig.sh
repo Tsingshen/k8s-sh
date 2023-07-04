@@ -15,6 +15,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: ${USER_NAME}
+  namespace: ${NAMESPACE}
   annotations:
     kubernetes.io/service-account.name: ${USER_NAME}
 type: kubernetes.io/service-account-token
@@ -48,12 +49,12 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: ${USER_NAME}
-  namespace: ${USER_NAME}
+  namespace: ${NAMESPACE}
 EOF
 #生成kubeconfig配置文件
 
-secret_data_ca_crt=$(kubectl get secrets ${USER_NAME} -o go-template='{{index .data "ca.crt"}}')
-secret_data_token=$(kubectl get secrets ${USER_NAME} -o go-template='{{index .data "token"}}'|base64 -d)
+secret_data_ca_crt=$(kubectl -n ${NAMESPACE} get secrets ${USER_NAME} -o go-template='{{index .data "ca.crt"}}')
+secret_data_token=$(kubectl -n ${NAMESPACE} get secrets ${USER_NAME} -o go-template='{{index .data "token"}}'|base64 -d)
 
 echo """生成的kueconfig为:
 ---
