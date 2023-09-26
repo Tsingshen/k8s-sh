@@ -53,6 +53,8 @@ subjects:
 EOF
 #生成kubeconfig配置文件
 
+## wait for k8s generate resource for 8 seconds
+sleep 8
 secret_data_ca_crt=$(kubectl -n ${NAMESPACE} get secrets ${USER_NAME} -o go-template='{{index .data "ca.crt"}}')
 secret_data_token=$(kubectl -n ${NAMESPACE} get secrets ${USER_NAME} -o go-template='{{index .data "token"}}'|base64 -d)
 
