@@ -1,1 +1,1 @@
-# k8s-sh
+# some k8s used shell script
