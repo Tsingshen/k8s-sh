@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # 更改为你要创建的用户名称
-USER_NAME="vs-ro"
+USER_NAME="vs-ro" ## 注意不要使用 cluster-admin 和已经存在的用户, 会冲突
 NAMESPACE="default"
+CLUSTER_NAME="k8s-test"
 SERVER_ADDR="https://xx.com"
 
 
@@ -25,7 +26,7 @@ kubectl create -f - <<EOF
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: ${USER_NAME}
+  name: ${USER_NAME}-kube-sh
 rules:
 - apiGroups:
   - networking.istio.io
@@ -41,11 +42,11 @@ kubectl create -f - <<EOF
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: ${USER_NAME}
+  name: ${USER_NAME}-kube-sh
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: ${USER_NAME}
+  name: ${USER_NAME}-kube-sh
 subjects:
 - kind: ServiceAccount
   name: ${USER_NAME}
@@ -53,8 +54,8 @@ subjects:
 EOF
 #生成kubeconfig配置文件
 
-echo  "wait for k8s generate resource for 8 seconds ..."
-sleep 8
+echo  "wait for k8s generate resource for 5 seconds ..."
+sleep 5
 secret_data_ca_crt=$(kubectl -n ${NAMESPACE} get secrets ${USER_NAME} -o go-template='{{index .data "ca.crt"}}')
 secret_data_token=$(kubectl -n ${NAMESPACE} get secrets ${USER_NAME} -o go-template='{{index .data "token"}}'|base64 -d)
 
@@ -65,17 +66,17 @@ clusters:
 - cluster:
     certificate-authority-data: ${secret_data_ca_crt}
     server: ${SERVER_ADDR}
-  name: cluster-${USER_NAME}
+  name: ${CLUSTER_NAME}
 contexts:
 - context:
-    cluster: cluster-${USER_NAME}
+    cluster: ${CLUSTER_NAME}
     namespace: default
-    user: cluster-${USER_NAME}
-  name: cluster-${USER_NAME}
-current-context: cluster-${USER_NAME}
+    user: ${CLUSTER_NAME}-${USER_NAME}
+  name: ${CLUSTER_NAME}
+current-context: ${CLUSTER_NAME}
 kind: Config
 preferences: {}
 users:
-- name: cluster-${USER_NAME}
+- name: ${CLUSTER_NAME}-${USER_NAME}
   user:
     token: ${secret_data_token}"""
